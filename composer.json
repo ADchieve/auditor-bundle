@@ -1,5 +1,5 @@
 {
-    "name": "damienharper/auditor-bundle",
+    "name": "adchieve/auditor-bundle",
     "type": "symfony-bundle",
     "description": "Integrate auditor library in your Symfony projects.",
     "keywords": ["doctrine", "audit", "auditor", "audit-log", "audit-trail"],
@@ -64,6 +64,9 @@
         "allow-plugins": {
             "composer/package-versions-deprecated": true
         }
+    },
+    "replace": {
+        "damienharper/auditor-bundle": "5.0.1"
     },
     "extra": {
         "branch-alias": {
