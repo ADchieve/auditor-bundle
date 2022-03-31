@@ -11,17 +11,19 @@
         }
     ],
     "require": {
-        "php": ">=8.2",
+        "php": ">=7.4",
+        "ext-json": "*",
         "damienharper/auditor": "dev-master",
-        "doctrine/doctrine-bundle": "^2.0",
-        "doctrine/orm": "^2.13",
-        "symfony/asset": "^5.4|^6.0|^7.0",
-        "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
-        "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
-        "symfony/lock": "^5.4|^6.0|^7.0",
-        "symfony/security-bundle": "^5.4|^6.0|^7.0",
-        "symfony/translation": "^5.4|^6.0|^7.0",
-        "symfony/twig-bundle": "^5.4|^6.0|^7.0",
+        "doctrine/annotations": "^1.8",
+        "doctrine/doctrine-bundle": "^1.9|^2.0",
+        "doctrine/orm": "^2.7",
+        "symfony/asset": "^4.0|^5.0|^6.0",
+        "symfony/doctrine-bridge": "^4.4.19|^5.2.2|^6.0",
+        "symfony/event-dispatcher": "^4.0|^5.0|^6.0",
+        "symfony/lock": "^4.0|^5.0|^6.0",
+        "symfony/security-bundle": "^4.0|^5.0|^6.0",
+        "symfony/translation": "^4.0|^5.0|^6.0",
+        "symfony/twig-bundle": "^4.0|^5.0|^6.0",
         "twig/extra-bundle": "^3.3",
         "twig/intl-extra": "^3.3"
     },
@@ -73,12 +75,5 @@
     },
     "replace": {
         "damienharper/auditor-bundle": "5.0.1"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "6.x-dev",
-            "dev-5.x": "5.x-dev",
-            "dev-4.x": "4.x-dev"
-        }
     }
 }
