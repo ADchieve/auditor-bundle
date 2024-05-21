@@ -1,8 +1,6 @@
 name: auditor-bundle 5.x CI
 
 on:
-  schedule:
-    - cron: 0 1 * * *
   pull_request:
     branches:
       - master
@@ -18,7 +16,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,6 +48,8 @@ jobs:
           - '7.4'
           - '8.0'
           - '8.1'
+          - '8.2'
+          - '8.3'
         symfony:
           - '4.4.*'
           - '5.*'
@@ -55,7 +57,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -66,15 +70,16 @@ jobs:
 
       - name: Configure Symfony
         run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
           composer global require --no-progress --no-scripts --no-plugins symfony/flex
           composer config extra.symfony.require "${{ matrix.symfony }}"
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
@@ -87,6 +92,9 @@ jobs:
       - name: Update project dependencies (5.*)
         if: matrix.symfony == '5.*'
         run: SYMFONY_REQUIRE="^5.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Install auditor from source
+        run: composer reinstall damienharper/auditor --prefer-install=source
 
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
@@ -101,7 +109,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
@@ -116,13 +124,17 @@ jobs:
         php:
           - '8.0'
           - '8.1'
+          - '8.2'
+          - '8.3'
         symfony:
           - '6.*'
       fail-fast: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -133,15 +145,16 @@ jobs:
 
       - name: Configure Symfony
         run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
           composer global require --no-progress --no-scripts --no-plugins symfony/flex
           composer config extra.symfony.require "${{ matrix.symfony }}"
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
@@ -150,6 +163,9 @@ jobs:
       - name: Update project dependencies (6.*)
         if: matrix.symfony == '6.*'
         run: SYMFONY_REQUIRE="^6.0" composer update --no-progress --ansi --prefer-stable
+
+      - name: Install auditor from source
+        run: composer reinstall damienharper/auditor --prefer-install=source
 
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
@@ -164,7 +180,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
@@ -178,17 +194,17 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
         with:
           fetch-depth: 2
 
       - name: "Download coverage files"
-        uses: "actions/download-artifact@v2"
+        uses: "actions/download-artifact@v3"
         with:
           path: "reports"
 
       - name: "Upload to Codecov"
-        uses: "codecov/codecov-action@v2"
+        uses: "codecov/codecov-action@v3"
         with:
           directory: reports
           token: ${{ env.CODECOV_TOKEN }}
