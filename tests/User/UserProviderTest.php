@@ -11,6 +11,7 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\DHAuditorBundle;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\HttpKernelBrowser;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -29,6 +30,7 @@ final class UserProviderTest extends WebTestCase
     use ReaderTrait;
 
     private DoctrineProvider $provider;
+    private HttpKernelBrowser $client;
 
     protected function setUp(): void
     {
@@ -57,12 +59,14 @@ final class UserProviderTest extends WebTestCase
 
         $firewallName = 'main';
 
-        if (6 === Kernel::MAJOR_VERSION) {
+        if (Kernel::MAJOR_VERSION >= 6) {
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
         } else {
             $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
         }
-        self::$container->get('security.token_storage')->setToken($token);
+
+        self::getContainer()->get('security.token_storage')->setToken($token);
+
         $post = new Post();
         $post
             ->setTitle('Blameable post')
@@ -71,6 +75,7 @@ final class UserProviderTest extends WebTestCase
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         self::assertSame('dark.vador', $entries[0]->getUsername());
@@ -87,7 +92,7 @@ final class UserProviderTest extends WebTestCase
 
         $firewallName = 'main';
 
-        if (6 === Kernel::MAJOR_VERSION) {
+        if (Kernel::MAJOR_VERSION >= 6) {
             $userToken = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
             $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $userToken);
         } else {
@@ -95,7 +100,8 @@ final class UserProviderTest extends WebTestCase
             $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
         }
 
-        self::$container->get('security.token_storage')->setToken($token);
+        self::getContainer()->get('security.token_storage')->setToken($token);
+
         $post = new Post();
         $post
             ->setTitle('Blameable post')
@@ -104,6 +110,7 @@ final class UserProviderTest extends WebTestCase
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         self::assertSame('second_user[impersonator dark.vador]', $entries[0]->getUsername());
@@ -116,7 +123,7 @@ final class UserProviderTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        $this->provider = self::$container->get(DoctrineProvider::class);
+        $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 
     private function createUser(string $username): UserInterface

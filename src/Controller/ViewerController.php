@@ -10,26 +10,27 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Helper\UrlHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
+use Twig\Environment;
 
 /**
- * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
+ * @see ViewerControllerTest
  */
-class ViewerController extends AbstractController
+final class ViewerController
 {
-    private $environment;
+    private Environment $environment;
 
-    public function __construct(\Twig\Environment $environment)
+    public function __construct(Environment $environment)
     {
         $this->environment = $environment;
     }
 
-    /**
-     * @Route(path="/audit", name="dh_auditor_list_audits", methods={"GET"})
-     */
+    #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
     public function listAuditsAction(Reader $reader): Response
     {
         $schemaManager = new SchemaManager($reader->getProvider());
@@ -38,7 +39,7 @@ class ViewerController extends AbstractController
         $auditingServices = $reader->getProvider()->getAuditingServices();
         $audited = [];
         $scope = Security::VIEW_SCOPE;
-        foreach ($auditingServices as $name => $auditingService) {
+        foreach ($auditingServices as $auditingService) {
             $audited = array_merge(
                 $audited,
                 array_filter(
@@ -53,31 +54,25 @@ class ViewerController extends AbstractController
             );
         }
 
-        return $this->render('@DHAuditor/Audit/audits.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
             'audited' => $audited,
             'reader' => $reader,
         ]);
     }
 
-    /**
-     * @Route(path="/audit/transaction/{hash}", name="dh_auditor_show_transaction", methods={"GET"})
-     */
+    #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction', methods: ['GET'])]
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
         $audits = $reader->getAuditsByTransactionHash($hash);
 
-        return $this->render('@DHAuditor/Audit/transaction.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/transaction.html.twig', [
             'hash' => $hash,
             'audits' => $audits,
         ]);
     }
 
-    /**
-     * @Route(path="/audit/{entity}/{id}", name="dh_auditor_show_entity_history", methods={"GET"})
-     *
-     * @param int|string $id
-     */
-    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response
+    #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
+    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, null|int|string $id = null): Response
     {
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
@@ -85,7 +80,7 @@ class ViewerController extends AbstractController
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
-            throw $this->createNotFoundException();
+            throw new NotFoundHttpException('Not Found');
         }
 
         try {
@@ -95,18 +90,18 @@ class ViewerController extends AbstractController
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
         } catch (AccessDeniedException $e) {
-            throw $this->createAccessDeniedException();
+            throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
-        return $this->render('@DHAuditor/Audit/entity_history.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/entity_history.html.twig', [
             'id' => $id,
             'entity' => $entity,
             'paginator' => $pager,
         ]);
     }
 
-    protected function renderView(string $view, array $parameters = []): string
+    private function renderView(string $view, array $parameters = []): Response
     {
-        return $this->environment->render($view, $parameters);
+        return new Response($this->environment->render($view, $parameters));
     }
 }

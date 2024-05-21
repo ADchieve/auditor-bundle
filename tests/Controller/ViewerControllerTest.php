@@ -14,10 +14,8 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
-use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\User;
@@ -89,10 +87,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
@@ -129,10 +127,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
@@ -170,10 +168,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
@@ -306,7 +304,6 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
-        $session = self::$container->get('session');
         $class = class_exists(User::class) ? User::class : InMemoryUser::class;
         $user = new $class(
             'dark.vador',
@@ -314,24 +311,11 @@ final class ViewerControllerTest extends WebTestCase
             $roles
         );
 
-        $firewallName = 'main';
-
-        if (6 === Kernel::MAJOR_VERSION) {
-            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
-        } else {
-            $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        }
-        $session->set('_security_'.$firewallName, serialize($token));
-        $session->save();
-
-        self::$container->get('security.token_storage')->setToken($token);
-
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->client->getCookieJar()->set($cookie);
+        $this->client->loginUser($user);
     }
 
     private function createAndInitDoctrineProvider(): void
     {
-        $this->provider = self::$container->get(DoctrineProvider::class);
+        $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }
