@@ -1,14 +1,12 @@
 name: auditor-bundle 5.x CI
 
 on:
-  schedule:
-    - cron: 15 0 * * *
   pull_request:
     branches:
-      - 5.x
+      - master
   push:
     branches:
-      - 5.x
+      - master
 
 jobs:
 
