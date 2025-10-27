@@ -77,7 +77,7 @@
         }
     },
     "replace": {
-        "damienharper/auditor-bundle": "5.0.1"
+        "damienharper/auditor-bundle": "5.2.6"
     },
     "extra": {
         "branch-alias": {
