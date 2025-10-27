@@ -5,27 +5,48 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
 use DH\Auditor\Configuration;
+use DH\Auditor\Provider\Doctrine\Auditing\Logger\Middleware\DHMiddleware;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
-use DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass;
-use DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass;
+use DH\AuditorBundle\DependencyInjection\DHAuditorExtension;
+use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
+use Doctrine\DBAL\Driver\Middleware;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @internal
  *
  * @small
  */
-final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTestCase
+final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestCase
 {
     public function testCompilerPass(): void
     {
-        $config = [
+        if (!interface_exists(Middleware::class) || !class_exists(DHMiddleware::class)) {
+            self::markTestSkipped('DHMiddleware isn\'t supported');
+        }
+        $this->container->setParameter('kernel.cache_dir', sys_get_temp_dir());
+        $this->container->setParameter('kernel.debug', false);
+        $this->container->setParameter('kernel.bundles', []);
+        $doctrineConfig = [
+            'dbal' => [
+                'default_connection' => 'default',
+                'connections' => [
+                    'default' => [],
+                ],
+            ],
+            'orm' => [
+                'auto_mapping' => true,
+            ],
+        ];
+        $this->setParameter('doctrine', $doctrineConfig);
+
+        $DHConfig = [
             'enabled' => true,
             'timezone' => 'UTC',
             'user_provider' => 'dh_auditor.user_provider',
@@ -64,35 +85,24 @@ final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTest
                 ],
             ],
         ];
-        $this->setParameter('dh_auditor.configuration', $config);
+        $this->setParameter('dh_auditor.configuration', $DHConfig);
 
         $auditorService = new Definition();
         $this->setDefinition(Configuration::class, $auditorService);
-
+        $this->container->loadFromExtension('doctrine', $doctrineConfig);
+        $this->container->loadFromExtension('dh_auditor', $DHConfig);
         $this->compile();
 
-        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            Configuration::class,
-            'setRoleChecker',
-            [new Reference('dh_auditor.role_checker')]
-        );
-
-        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            Configuration::class,
-            'setUserProvider',
-            [new Reference('dh_auditor.user_provider')]
-        );
-
-        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            Configuration::class,
-            'setSecurityProvider',
-            [new Reference('dh_auditor.security_provider')]
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(
+            'doctrine.dbal.default_connection.dh_middleware',
+            'doctrine.middleware'
         );
     }
 
     protected function registerCompilerPass(ContainerBuilder $container): void
     {
-        $container->addCompilerPass(new AddProviderCompilerPass());
-        $container->addCompilerPass(new CustomConfigurationCompilerPass());
+        $this->container->registerExtension(new DoctrineExtension());
+        $this->container->registerExtension(new DHAuditorExtension());
+        $container->addCompilerPass(new DoctrineProviderConfigurationCompilerPass());
     }
 }
