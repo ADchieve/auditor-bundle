@@ -32,7 +32,7 @@ final class MacrosTest extends KernelTestCase
         }
         $twig->addExtension(new StringLoaderExtension());
         $em = $this->createEntityManager([
-            __DIR__.'/../../../vendor/damienharper/auditor/tests/Provider/Doctrine/Fixtures/Issue112',
+            __DIR__.'/../../../vendor/adchieve/auditor/tests/Provider/Doctrine/Fixtures/Issue112',
         ]);
         $entity = new DummyEntity();
         $entity->setPrimaryKey(1);

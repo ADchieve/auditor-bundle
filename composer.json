@@ -17,13 +17,14 @@
         "doctrine/annotations": "^1.8|^2.0",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.7",
-        "symfony/asset": "^4.0|^5.0|^6.0",
-        "symfony/doctrine-bridge": "^4.4.19|^5.2.2|^6.0",
-        "symfony/event-dispatcher": "^4.0|^5.0|^6.0",
-        "symfony/lock": "^4.0|^5.0|^6.0",
-        "symfony/security-bundle": "^4.0|^5.0|^6.0",
-        "symfony/translation": "^4.0|^5.0|^6.0",
-        "symfony/twig-bundle": "^4.0|^5.0|^6.0",
+        "symfony/asset": "^4.0|^5.0|^6.0|^7.0",
+        "symfony/doctrine-bridge": "^4.4.19|^5.2.2|^6.0|^7.0",
+        "symfony/event-dispatcher": "^4.0|^5.0|^6.0|^7.0",
+        "symfony/lock": "^4.0|^5.0|^6.0|^7.0",
+        "symfony/routing": "^4.4|^5.0|^6.0|^7.0",
+        "symfony/security-bundle": "^4.0|^5.0|^6.0|^7.0",
+        "symfony/translation": "^4.0|^5.0|^6.0|^7.0",
+        "symfony/twig-bundle": "^4.0|^5.0|^6.0|^7.0",
         "twig/extra-bundle": "^3.3",
         "twig/intl-extra": "^3.3"
     },
@@ -41,20 +42,17 @@
     "autoload-dev": {
         "psr-4": {
             "DH\\AuditorBundle\\Tests\\": "tests",
-            "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor/tests"
+            "DH\\Auditor\\Tests\\": "vendor/adchieve/auditor/tests"
         }
     },
     "require-dev": {
         "gedmo/doctrine-extensions": "^2.4|^3.0",
-        "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0",
-        "nyholm/symfony-bundle-test": "1.x-dev",
+        "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0|^5.0",
         "phpunit/phpunit": "^8.0|^9.0",
-        "symfony/browser-kit": "^4.0|^5.1|^6.0",
-        "symfony/css-selector": "^5.1|^6.0",
-        "symfony/framework-bundle": "^4.4|^5.0|^6.0",
-        "symfony/var-dumper": "^4.0|^5.0|^6.0",
-        "symfony/webpack-encore-bundle": "^1.12",
-        "twig/extensions": "^1.5",
+        "symfony/browser-kit": "^4.0|^5.1|^6.0|^7.0",
+        "symfony/css-selector": "^5.1|^6.0|^7.0",
+        "symfony/framework-bundle": "^4.4|^5.0|^6.0|^7.0",
+        "symfony/var-dumper": "^4.0|^5.0|^6.0|^7.0",
         "doctrine/data-fixtures": "^1.4"
     },
     "conflict": {

@@ -194,7 +194,7 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
         self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->filter('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     /**
@@ -226,7 +226,7 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
         self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->filter('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     /**
@@ -265,13 +265,13 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
         self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->filter('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
         self::assertSame(4, $sections->count(), 'There are 3 sections.');
-        self::assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
-        self::assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
-        self::assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
+        self::assertSame(Author::class, trim($sections->eq(0)->filter('div > code')->text()), Author::class);
+        self::assertSame(Post::class, trim($sections->eq(1)->filter('div > code')->text()), Post::class);
+        self::assertSame(Comment::class, trim($sections->eq(2)->filter('div > code')->text()), Comment::class);
     }
 
     /**
@@ -296,12 +296,12 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
         self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->filter('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
         self::assertSame(3, $sections->count(), 'There are 2 sections.');
-        self::assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
-        self::assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
+        self::assertSame(Post::class, trim($sections->eq(0)->filter('div > code')->text()), Post::class);
+        self::assertSame(Comment::class, trim($sections->eq(1)->filter('div > code')->text()), Comment::class);
     }
 
     private function login(array $roles = []): void
@@ -317,7 +317,7 @@ final class ViewerControllerTest extends WebTestCase
             );
             $firewallName = 'main';
 
-            if (6 === Kernel::MAJOR_VERSION) {
+            if (Kernel::MAJOR_VERSION >= 6) {
                 $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
             } else {
                 $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());

@@ -28,7 +28,6 @@ services:
 
   DH\AuditorBundle\Routing\RoutingAnnotationLoader:
     arguments:
-      - '@routing.loader.annotation'
       - '%dh_auditor.provider.doctrine.configuration%'
     tags:
       - { name: routing.loader }

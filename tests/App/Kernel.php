@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-if (6 === BaseKernel::MAJOR_VERSION) {
+if (BaseKernel::MAJOR_VERSION >= 6) {
     class Kernel extends BaseKernel
     {
         use MicroKernelTrait;

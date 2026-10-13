@@ -6,21 +6,18 @@ namespace DH\AuditorBundle\Routing;
 
 use DH\AuditorBundle\Controller\ViewerController;
 use RuntimeException;
-use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 class RoutingAnnotationLoader extends Loader
 {
-    private AnnotatedRouteControllerLoader $annotatedRouteControllerLoader;
-
     private bool $isLoaded = false;
 
     private array $configuration;
 
-    public function __construct(AnnotatedRouteControllerLoader $annotatedRouteController, array $configuration)
+    public function __construct(array $configuration)
     {
-        $this->annotatedRouteControllerLoader = $annotatedRouteController;
         $this->configuration = $configuration;
     }
 
@@ -36,7 +33,16 @@ class RoutingAnnotationLoader extends Loader
 
         $routeCollection = new RouteCollection();
         if (true === $this->configuration['viewer']) {
-            $routeCollection = $this->annotatedRouteControllerLoader->load(ViewerController::class);
+            $routeCollection->add('dh_auditor_list_audits', new Route('/audit', [
+                '_controller' => ViewerController::class.'::listAuditsAction',
+            ], [], [], '', [], ['GET']));
+            $routeCollection->add('dh_auditor_show_transaction', new Route('/audit/transaction/{hash}', [
+                '_controller' => ViewerController::class.'::showTransactionAction',
+            ], [], [], '', [], ['GET']));
+            $routeCollection->add('dh_auditor_show_entity_history', new Route('/audit/{entity}/{id}', [
+                '_controller' => ViewerController::class.'::showEntityHistoryAction',
+                'id' => null,
+            ], [], [], '', [], ['GET']));
         }
 
         $this->isLoaded = true;

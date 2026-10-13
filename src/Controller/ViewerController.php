@@ -14,7 +14,6 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 use Twig\Environment;
 
@@ -32,9 +31,6 @@ class ViewerController
         $this->environment = $environment;
     }
 
-    /**
-     * @Route(path="/audit", name="dh_auditor_list_audits", methods={"GET"})
-     */
     public function listAuditsAction(Reader $reader): Response
     {
         $schemaManager = new SchemaManager($reader->getProvider());
@@ -64,9 +60,6 @@ class ViewerController
         ]);
     }
 
-    /**
-     * @Route(path="/audit/transaction/{hash}", name="dh_auditor_show_transaction", methods={"GET"})
-     */
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
         $audits = $reader->getAuditsByTransactionHash($hash);
@@ -78,8 +71,6 @@ class ViewerController
     }
 
     /**
-     * @Route(path="/audit/{entity}/{id}", name="dh_auditor_show_entity_history", methods={"GET"})
-     *
      * @param int|string $id
      */
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response

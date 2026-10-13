@@ -94,7 +94,7 @@ jobs:
         run: SYMFONY_REQUIRE="^5.4" composer update --no-progress --ansi --prefer-stable
 
       - name: Install auditor from source
-        run: composer reinstall damienharper/auditor --prefer-install=source
+        run: composer reinstall adchieve/auditor --prefer-install=source
 
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
@@ -114,7 +114,7 @@ jobs:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
 
-  tests_sf_6:
+  tests_sf_6_sf_7:
     name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
     runs-on: ubuntu-latest
     needs: [ code_style_composer_checks ]
@@ -126,8 +126,15 @@ jobs:
           - '8.1'
           - '8.2'
           - '8.3'
+          - '8.4'
         symfony:
           - '6.*'
+          - '7.4.*'
+        exclude:
+          - php: '8.0'
+            symfony: '7.4.*'
+          - php: '8.1'
+            symfony: '7.4.*'
       fail-fast: false
 
     steps:
@@ -164,8 +171,12 @@ jobs:
         if: matrix.symfony == '6.*'
         run: SYMFONY_REQUIRE="^6.0" composer update --no-progress --ansi --prefer-stable
 
+      - name: Update project dependencies (7.4.*)
+        if: matrix.symfony == '7.4.*'
+        run: SYMFONY_REQUIRE="^7.4" composer update --no-progress --ansi --prefer-stable
+
       - name: Install auditor from source
-        run: composer reinstall damienharper/auditor --prefer-install=source
+        run: composer reinstall adchieve/auditor --prefer-install=source
 
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
@@ -190,7 +201,7 @@ jobs:
     runs-on: "ubuntu-latest"
     needs:
       - tests_sf4_sf5
-      - tests_sf_6
+      - tests_sf_6_sf_7
 
     steps:
       - name: "Checkout"
